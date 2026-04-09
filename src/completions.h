@@ -41,7 +41,7 @@ ic_private ssize_t     completions_apply_longest_prefix(completions_t* cms, stri
 typedef bool (ic_completion_fun_t)( ic_env_t* env, void* funenv, const char* replacement, const char* display, const char* help, long delete_before, long delete_after );
 
 struct ic_completion_env_s {
-  ic_env_t*   env;       // the isocline environment
+  ic_env_t*   env;       // the icline environment
   const char* input;     // current full input
   long        cursor;    // current cursor position
   void*       arg;       // argument given to `ic_set_completer`

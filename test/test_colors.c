@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <isocline.h>
+#include <icline.h>
 
 static const char* patch = "■";
 

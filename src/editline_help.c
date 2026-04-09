@@ -95,10 +95,10 @@ static const char* help[] = {
 
 static const char* help_initial = 
   "[ic-info]"
-  "Isocline v1.0, copyright (c) 2021 Daan Leijen.\n"
+  "icline v1.0, copyright (c) 2021 Daan Leijen.\n"
   "This is free software; you can redistribute it and/or\n"
   "modify it under the terms of the MIT License.\n"
-  "See <[url]https://github.com/daanx/isocline[/url]> for further information.\n"
+  "See <[url]https://github.com/daanx/icline[/url]> for further information.\n"
   "We use ^<key> as a shorthand for ctrl-<key>.\n"
   "\n"
   "Overview:\n"

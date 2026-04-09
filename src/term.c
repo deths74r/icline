@@ -760,7 +760,7 @@ static void term_write_esc( term_t* term, const char* s, ssize_t len ) {
       term_set_win_attr( term, attr_from_esc_sgr(s,len) ); 
       break;
 
-    // support some less standard escape codes (currently not used by isocline)
+    // support some less standard escape codes (currently not used by icline)
     case 'E':  // line down
       term_get_cursor_pos(term, &row, &col);
       row += esc_param(s+2, 1);

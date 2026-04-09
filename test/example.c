@@ -4,14 +4,14 @@
   under the terms of the MIT License. A copy of the license can be
   found in the "LICENSE" file at the root of this distribution.
 
-  Example use of the Isocline API.
+  Example use of the icline API.
 -----------------------------------------------------------------------------*/
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
-#include "isocline.h"
+#include "icline.h"
 
 // completion function defined below
 static void completer(ic_completion_env_t* cenv, const char* prefix );
@@ -28,7 +28,7 @@ int main()
   ic_style_def("kbd","gray underline");     // you can define your own styles
   ic_style_def("ic-prompt","ansi-maroon");  // or re-define system styles
   
-  ic_printf( "[b]Isocline[/b] sample program:\n"
+  ic_printf( "[b]icline[/b] sample program:\n"
               "- Type 'exit' to quit. (or use [kbd]ctrl-d[/]).\n"
               "- Press [kbd]F1[/] for help on editing commands.\n"
               "- Use [kbd]shift-tab[/] for multiline input. (or [kbd]ctrl-enter[/], or [kbd]ctrl-j[/])\n"

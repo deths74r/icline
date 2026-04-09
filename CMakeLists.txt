@@ -2,7 +2,7 @@
 # Copyright (c) 2021, Daan Leijen
 # -----------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10)
-project(libisocline C CXX ASM)
+project(libicline C CXX ASM)
 
 set(CMAKE_C_STANDARD   99)
 set(CMAKE_CXX_STANDARD 11)
@@ -10,11 +10,11 @@ set(CMAKE_CXX_STANDARD 11)
 option(IC_USE_CXX           "Build with C++ compiler" OFF)
 option(IC_DEBUG_UBSAN       "Build with undefined behaviour sanitizer" OFF)
 option(IC_DEBUG_ASAN        "Build with address sanitizer" OFF)
-option(IC_DEBUG_MSG         "Enable printing debug messages stderr (only if also ISOCLINE_DEBUG=1 is set in the environment)" ON)
+option(IC_DEBUG_MSG         "Enable printing debug messages stderr (only if also ICLINE_DEBUG=1 is set in the environment)" ON)
 option(IC_SEPARATE_OBJS     "Compile with separate object files instead of one (warning: exports internal symbols)" OFF)
 
 set(ic_version "0.1")
-set(ic_sources          src/isocline.c)    
+set(ic_sources          src/icline.c)    
 set(ic_example_sources  test/example.c test/test_colors.c)
 
 # -----------------------------------------------------------------------------
@@ -130,7 +130,7 @@ endif()
 # -----------------------------------------------------------------------------
 
 message(STATUS "")
-message(STATUS "Library   : libisocline")
+message(STATUS "Library   : libicline")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compiler  : ${IC_COMPILER_ID}")
 message(STATUS "Defines   : ${ic_cdefs}")
@@ -139,14 +139,14 @@ message(STATUS "")
 
 
 # -----------------------------------------------------------------------------
-# Static library (libisocline.a) and samples (example)
+# Static library (libicline.a) and samples (example)
 # -----------------------------------------------------------------------------
 
-add_library(isocline STATIC ${ic_sources})
-set_property(TARGET isocline PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_compile_options(isocline PRIVATE ${ic_cflags})
-target_compile_definitions(isocline PRIVATE ${ic_cdefs})
-target_include_directories(isocline PUBLIC
+add_library(icline STATIC ${ic_sources})
+set_property(TARGET icline PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_compile_options(icline PRIVATE ${ic_cflags})
+target_compile_definitions(icline PRIVATE ${ic_cdefs})
+target_include_directories(icline PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${ic_install_dir}/include>
 )
@@ -154,9 +154,9 @@ target_include_directories(isocline PUBLIC
 add_executable(example test/example.c)
 target_compile_options(example PRIVATE ${ic_cflags})
 target_include_directories(example PRIVATE include)
-target_link_libraries(example PRIVATE isocline)
+target_link_libraries(example PRIVATE icline)
 
 add_executable(test_colors test/test_colors.c)
 target_compile_options(test_colors PRIVATE ${ic_cflags})
 target_include_directories(test_colors PRIVATE include)
-target_link_libraries(test_colors PRIVATE isocline)
+target_link_libraries(example PRIVATE icline)

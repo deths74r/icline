@@ -5,8 +5,8 @@
   found in the "LICENSE" file at the root of this distribution.
 -----------------------------------------------------------------------------*/
 #pragma once
-#ifndef IC_ISOCLINE_H
-#define IC_ISOCLINE_H
+#ifndef IC_ICLINE_H
+#define IC_ICLINE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,11 +19,11 @@ extern "C" {
 
 
 /*! \mainpage
-Isocline C API reference.
+icline C API reference.
 
-Isocline is a pure C library that can be used as an alternative to the GNU readline library.
+icline is a pure C library that can be used as an alternative to the GNU readline library.
 
-See the [Github repository](https://github.com/daanx/isocline#readme) 
+See the [Github repository](https://github.com/deths74r/icline#readme) 
 for general information and building the library.
 
 Contents:
@@ -44,7 +44,7 @@ Contents:
 /// The basic readline interface.
 /// \{
 
-/// Isocline version: 102 = 1.0.2.
+/// icline version: 102 = 1.0.2.
 #define IC_VERSION   (104)  
 
 
@@ -68,7 +68,7 @@ char* ic_readline(const char* prompt_text);
 
 //--------------------------------------------------------------
 /// \defgroup bbcode Formatted Text
-/// Formatted text using [bbcode markup](https://github.com/daanx/isocline#bbcode-format).
+/// Formatted text using [bbcode markup](https://github.com/deths74r/icline#bbcode-format).
 /// \{
 
 /// Print to the terminal while respection bbcode markup. 
@@ -88,7 +88,7 @@ char* ic_readline(const char* prompt_text);
 ///   instead of `color=red`, or `on red` instead of `bgcolor=red`), and there are
 ///   the `b`, `i`, `u`, and `r` styles for bold, italic, underline, and reverse.
 /// 
-/// See [here](https://github.com/daanx/isocline#bbcode-format) for a description of the full bbcode format.
+/// See [here](https://github.com/deths74r/icline#bbcode-format) for a description of the full bbcode format.
 void ic_print( const char* s );
 
 /// Print with bbcode markup ending with a newline.
@@ -156,7 +156,7 @@ struct ic_completion_env_s;
 /// A completion environment
 typedef struct ic_completion_env_s ic_completion_env_t;
 
-/// A completion callback that is called by isocline when tab is pressed.
+/// A completion callback that is called by icline when tab is pressed.
 /// It is passed a completion environment (containing the current input and the current cursor position), 
 /// the current input up-to the cursor (`prefix`)
 /// and the user given argument when the callback was set.
@@ -173,7 +173,7 @@ void ic_set_default_completer( ic_completer_fun_t* completer, void* arg);
 
 
 /// In a completion callback (usually from ic_complete_word()), use this function to add a completion.
-/// (the completion string is copied by isocline and do not need to be preserved or allocated).
+/// (the completion string is copied by icline and do not need to be preserved or allocated).
 ///
 /// Returns `true` if the callback should continue trying to find more possible completions.
 /// If `false` is returned, the callback should try to return and not add more completions (for improved latency).
@@ -182,7 +182,7 @@ bool ic_add_completion(ic_completion_env_t* cenv, const char* completion);
 /// In a completion callback (usually from ic_complete_word()), use this function to add a completion.
 /// The `display` is used to display the completion in the completion menu, and `help` is
 /// displayed for hints for example. Both can be `NULL` for the default.
-/// (all are copied by isocline and do not need to be preserved or allocated).
+/// (all are copied by icline and do not need to be preserved or allocated).
 ///
 /// Returns `true` if the callback should continue trying to find more possible completions.
 /// If `false` is returned, the callback should try to return and not add more completions (for improved latency).
@@ -429,7 +429,7 @@ bool ic_stop_completing( const ic_completion_env_t* cenv);
 /// `delete_after` _bytes_ are deleted after the cursor, and finally `completion` is inserted.
 /// The `display` is used to display the completion in the completion menu, and `help` is displayed
 /// with hinting. Both `display` and `help` can be NULL.
-/// (all are copied by isocline and do not need to be preserved or allocated).
+/// (all are copied by icline and do not need to be preserved or allocated).
 ///
 /// Returns `true` if the callback should continue trying to find more possible completions.
 /// If `false` is returned, the callback should try to return and not add more completions (for improved latency).
@@ -467,7 +467,7 @@ bool ic_char_is_nonwhite(const char* s, long len);
 
 /// Convenience: character class for separators.
 /// (``[ \t\r\n,.;:/\\(){}\[\]]``.)
-/// This is used for word boundaries in isocline.
+/// This is used in icline.
 bool ic_char_is_separator(const char* s, long len);
 
 /// Convenience: character class for non-separators.
@@ -624,4 +624,4 @@ const char* ic_strdup( const char* s );
 }
 #endif
 
-#endif /// IC_ISOCLINE_H
+#endif /// IC_ICLINE_H

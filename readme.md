@@ -5,7 +5,7 @@ icline is a pure C library for rich line editing, forked from [Isocline](https:/
 The key change: **Unicode 17.0** character width via [gstr.h](https://github.com/deths74r/gstr), replacing the original Unicode 5.0 (2007) width tables. This means correct cursor positioning for modern emoji, ZWJ sequences, CJK, and all scripts added in the last 17 years of Unicode.
 
 - Small: less than 12k lines and can be compiled as a single C file without
-  any dependencies or configuration (e.g. `gcc -c src/isocline.c`).
+  any dependencies or configuration (e.g. `gcc -c src/icline.c`).
 
 - Portable: works on Unix, Windows, and macOS, and uses a minimal
   subset of ANSI escape sequences.
@@ -25,7 +25,7 @@ The key change: **Unicode 17.0** character width via [gstr.h](https://github.com
 - Replaced `src/wcwidth.c` (Markus Kuhn, Unicode 5.0, 292 lines) with `src/gstr.h` (Unicode 17.0, grapheme-aware)
 - All isocline API and behavior is preserved — drop-in compatible
 - The `ic_` function prefix is unchanged
-- Single-file build is unchanged: `gcc -c src/isocline.c`
+- Single-file build is unchanged: `gcc -c src/icline.c`
 
 # Demo
 
@@ -38,7 +38,7 @@ Shows in order: unicode, syntax highlighting, brace matching, jump to matching b
 
 Include the isocline header in your C or C++ source:
 ```C
-#include <include/isocline.h>
+#include <include/icline.h>
 ```
 
 and call `ic_readline` to get user input with rich editing abilities:
@@ -56,7 +56,7 @@ See the [example] for a full example with completion, syntax highlighting, histo
 
 You can compile and run the [example] as:
 ```
-$ gcc -o example -Iinclude test/example.c src/isocline.c
+$ gcc -o example -Iinclude test/example.c src/icline.c
 $ ./example
 ```
 
@@ -164,7 +164,7 @@ Copy the sources (in `include` and `src`) into your project, or add the library 
 ```
 $ git submodule add https://github.com/deths74r/icline
 ```
-and add `icline/src/isocline.c` to your build rules -- no configuration is needed.
+and add `icline/src/icline.c` to your build rules -- no configuration is needed.
 
 ### Build with CMake
 
@@ -177,7 +177,7 @@ $ cd build/release
 $ cmake ../..
 $ cmake --build .
 ```
-This builds a static library `libisocline.a` (or `isocline.lib` on Windows)
+This builds a static library `libicline.a` (or `isocline.lib` on Windows)
 and the example program:
 ```
 $ ./example

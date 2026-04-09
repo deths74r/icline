@@ -10,7 +10,7 @@
 // symbols are public in the libray.
 // 
 // You can compile the entire library just as: 
-// $ gcc -c src/isocline.c 
+// $ gcc -c src/icline.c 
 //-------------------------------------------------------------
 #if !defined(IC_SEPARATE_OBJS)
 # ifndef _CRT_NONSTDC_NO_WARNINGS
@@ -44,7 +44,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "../include/isocline.h"
+#include "../include/icline.h"
 #include "common.h"
 #include "env.h"
 

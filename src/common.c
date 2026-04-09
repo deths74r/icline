@@ -274,7 +274,7 @@ ic_private void debug_msg(const char* fmt, ...) {
 #else
 ic_private void debug_msg(const char* fmt, ...) {
   static int debug_init;
-  static const char* debug_fname = "isocline.debug.txt";
+  static const char* debug_fname = "icline.debug.txt";
   // initialize?
   if (debug_init==0) {
     debug_init = -1;

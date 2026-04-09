@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "../include/isocline.h"  // ic_malloc_fun_t, ic_color_t etc.
+#include "../include/icline.h"  // ic_malloc_fun_t, ic_color_t etc.
 
 # ifdef __cplusplus
 #  define ic_extern_c   extern "C"
@@ -100,7 +100,7 @@ ic_private bool      utf8_is_cont(uint8_t c);
 
 // A color is either RGB or an ANSI code.
 // (RGB colors have bit 24 set to distinguish them from the ANSI color palette colors.)
-// (Isocline will automatically convert from RGB on terminals that do not support full colors)
+// (icline will automatically convert from RGB on terminals that do not support full colors)
 typedef uint32_t ic_color_t;
 
 // Create a color from a 24-bit color value.
