@@ -574,7 +574,7 @@ ic_private const char* parse_tag_value( tag_t* tag, char* idbuf, const char* s, 
     s = parse_skip_white(s);
   }  
   // limit name and attr to 128 bytes
-  char valbuf[128];
+  char valbuf[128] = {0};
   ic_strncpy( idbuf, 128, id, idend - id);
   ic_strncpy( valbuf, 128, val, valend - val);
   ic_str_tolower(idbuf);
