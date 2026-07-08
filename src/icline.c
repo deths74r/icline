@@ -588,7 +588,7 @@ ic_private ic_env_t* ic_get_env(void) {
   return rpenv;
 }
 
-ic_public void ic_init_custom_malloc( ic_malloc_fun_t* _malloc, ic_realloc_fun_t* _realloc, ic_free_fun_t* _free ) {
+ic_public void ic_init_custom_alloc( ic_malloc_fun_t* _malloc, ic_realloc_fun_t* _realloc, ic_free_fun_t* _free ) {
   assert(rpenv == NULL);
   if (rpenv != NULL) {
     ic_env_free(rpenv);    
