@@ -260,7 +260,7 @@ Changes from upstream:
 
 # Releases
 
-* Unreleased (main): Grapheme-cluster editing (cursor, backspace/delete, transpose, wrapping are cluster-atomic);
+* `2026-07-08`: v1.2.0: Grapheme-cluster editing (cursor, backspace/delete, transpose, wrapping are cluster-atomic);
   fix the unlinkable `ic_init_custom_alloc` and an exact-fit formatted-output truncation; zero-width conjoining
   Hangul jamo; CTest-registered test suites; remove Haskell bindings, VS2019 projects, and doxygen infrastructure.
 * `2026-04-09`: v1.1.0: Replace wcwidth.c (Unicode 5.0) with gstr.h (Unicode 17.0) for modern emoji, ZWJ, and CJK support.
