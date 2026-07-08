@@ -2,7 +2,7 @@
 # Copyright (c) 2021, Daan Leijen
 # -----------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10)
-project(libicline C CXX ASM)
+project(libicline VERSION 1.1.0 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD   99)
 set(CMAKE_CXX_STANDARD 11)
@@ -13,16 +13,17 @@ option(IC_DEBUG_ASAN        "Build with address sanitizer" OFF)
 option(IC_DEBUG_MSG         "Enable printing debug messages stderr (only if also ICLINE_DEBUG=1 is set in the environment)" ON)
 option(IC_SEPARATE_OBJS     "Compile with separate object files instead of one (warning: exports internal symbols)" OFF)
 
-set(ic_version "0.1")
-set(ic_sources          src/icline.c)    
+set(ic_sources          src/icline.c)
 set(ic_example_sources  test/example.c test/test_colors.c)
+set(ic_test_sources     test/test_width.c test/test_stringbuf.c)
 
 # -----------------------------------------------------------------------------
 # Initial definitions
 # -----------------------------------------------------------------------------
 set(ic_cflags)
 set(ic_cdefs)
-set(ic_install_dir)
+
+include(CTest)
 
 if(IC_SEPARATE_OBJS)
   list(APPEND ic_cdefs IC_SEPARATE_OBJS)
@@ -46,6 +47,7 @@ if(IC_USE_CXX)
   set(IC_COMPILER_ID "${CMAKE_CXX_COMPILER_ID}")
   set_source_files_properties(${ic_sources}         PROPERTIES LANGUAGE CXX )
   set_source_files_properties(${ic_example_sources} PROPERTIES LANGUAGE CXX )
+  set_source_files_properties(${ic_test_sources}    PROPERTIES LANGUAGE CXX )
 else()
   set(IC_COMPILER_ID "${CMAKE_C_COMPILER_ID}")  
 endif()
@@ -89,9 +91,9 @@ if(IC_DEBUG_UBSAN OR IC_DEBUG_ASAN)
     endif()
     list(JOIN ic_san "," ic_san)
     list(APPEND ic_cflags -fsanitize=${ic_san})
-    list(APPEND CMAKE_EXE_LINKER_FLAGS -fsanitize=${ic_san})    
+    string(APPEND CMAKE_EXE_LINKER_FLAGS " -fsanitize=${ic_san}")
   else()
-    message(WARNING "Can only use sanitizer with a clang debug build (currently: ${IC_COMPILER_ID}, CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, IC_USE_C=${IC_USE_C})")
+    message(WARNING "Can only use sanitizer with a clang debug build (currently: ${IC_COMPILER_ID}, CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, IC_USE_CXX=${IC_USE_CXX})")
   endif()
 endif()
 
@@ -146,10 +148,7 @@ add_library(icline STATIC ${ic_sources})
 set_property(TARGET icline PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_compile_options(icline PRIVATE ${ic_cflags})
 target_compile_definitions(icline PRIVATE ${ic_cdefs})
-target_include_directories(icline PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${ic_install_dir}/include>
-)
+target_include_directories(icline PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(example test/example.c)
 target_compile_options(example PRIVATE ${ic_cflags})
@@ -160,3 +159,27 @@ add_executable(test_colors test/test_colors.c)
 target_compile_options(test_colors PRIVATE ${ic_cflags})
 target_include_directories(test_colors PRIVATE include)
 target_link_libraries(test_colors PRIVATE icline)
+
+
+# -----------------------------------------------------------------------------
+# Tests (ctest)
+# -----------------------------------------------------------------------------
+
+if(BUILD_TESTING)
+  # Unicode width tests: exercise src/gstr.h directly (header-only, no libicline).
+  add_executable(test_width test/test_width.c)
+  target_compile_options(test_width PRIVATE ${ic_cflags})
+  add_test(NAME test_width COMMAND test_width)
+
+  # Stringbuf regression tests: compile src/icline.c into the test as a single
+  # translation unit to reach internal (ic_private) functions. Must not link
+  # libicline (duplicate symbols) and must not receive ${ic_cdefs}
+  # (IC_SEPARATE_OBJS would disable the amalgamation include).
+  add_executable(test_stringbuf test/test_stringbuf.c)
+  target_compile_options(test_stringbuf PRIVATE ${ic_cflags})
+  target_include_directories(test_stringbuf PRIVATE include)
+  add_test(NAME test_stringbuf COMMAND test_stringbuf)
+
+  # Smoke test: runs the linked library's output paths end to end.
+  add_test(NAME test_colors COMMAND test_colors)
+endif()
