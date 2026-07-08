@@ -57,7 +57,7 @@ static void pos_adjust( ic_highlight_env_t* henv, ssize_t* ppos, ssize_t* plen )
   if (henv->input == NULL) return;
 
   if (pos < 0) {
-    // negative `pos` is used as the unicode character position (for easy interfacing with Haskell)
+    // negative `pos` is used as the unicode character position (for easy interfacing with FFI bindings)
     ssize_t upos = -pos;
     ssize_t cpos = 0;
     ssize_t ucount = 0;

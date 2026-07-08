@@ -1,16 +1,10 @@
 out/
 build/
-dist/
 doc/html/
 .vs/
 .vscode/
-.stack-work/
 .DS_Store
-*.user
 *.exe
-*.hi
 *.o
-*_stub.h
-*.lock
 history.txt
-isocline.debug.txt
+icline.debug.txt
