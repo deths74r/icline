@@ -444,11 +444,15 @@ bool ic_add_completion_prim( ic_completion_env_t* cenv, const char* completion,
 /// Convenience functions for character classes, highlighting and completion.
 /// \{
 
-/// Convenience: return the position of a previous code point in a UTF-8 string `s` from postion `pos`.
+/// Convenience: return the position of the previous character in a UTF-8 string `s` from position `pos`.
+/// Steps over one extended grapheme cluster (UAX #29), so a ZWJ emoji sequence,
+/// flag pair, or combining-mark sequence counts as a single character.
 /// Returns `-1` if `pos <= 0` or `pos > strlen(s)` (or other errors).
 long ic_prev_char( const char* s, long pos );
 
-/// Convenience: return the position of the next code point in a UTF-8 string `s` from postion `pos`.
+/// Convenience: return the position of the next character in a UTF-8 string `s` from position `pos`.
+/// Steps over one extended grapheme cluster (UAX #29), so a ZWJ emoji sequence,
+/// flag pair, or combining-mark sequence counts as a single character.
 /// Returns `-1` if `pos < 0` or `pos >= strlen(s)` (or other errors).
 long ic_next_char( const char* s, long pos );
 

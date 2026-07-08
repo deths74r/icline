@@ -4,8 +4,9 @@ icline is a pure C library for rich line editing, forked from [Isocline](https:/
 
 The key change: **Unicode 17.0** character width via [gstr.h](https://github.com/deths74r/gstr), replacing the original Unicode 5.0 (2007) width tables. This means correct cursor positioning for modern emoji, ZWJ sequences, CJK, and all scripts added in the last 17 years of Unicode.
 
-- Small: less than 12k lines and can be compiled as a single C file without
-  any dependencies or configuration (e.g. `gcc -c src/icline.c`).
+- Small: about 11k lines of library code (plus 4k lines of Unicode width
+  tables) and can be compiled as a single C file without any dependencies or
+  configuration (e.g. `gcc -c src/icline.c`).
 
 - Portable: works on Unix, Windows, and macOS, and uses a minimal
   subset of ANSI escape sequences.
@@ -14,18 +15,44 @@ The key change: **Unicode 17.0** character width via [gstr.h](https://github.com
   undo/redo, incremental history search, inline hints, syntax highlighting, brace matching,
   closing brace insertion, auto indentation, graceful fallback, support for custom allocators, etc.
 
-- Unicode: **Unicode 17.0** character widths via gstr.h with grapheme-cluster-aware display width.
-  Correct handling of ZWJ emoji (👨‍👩‍👧 = width 2), flag sequences (🇺🇸 = width 2),
-  emoji presentation (VS16), combining marks, and all CJK blocks.
+- Unicode: **Unicode 17.0** character widths via gstr.h with grapheme-cluster-aware display width
+  *and* editing: the cursor, backspace, and delete treat a ZWJ emoji (👨‍👩‍👧 = width 2),
+  flag sequence (🇺🇸 = width 2), VS16 emoji presentation, keycap, combining-mark sequence,
+  or decomposed Hangul syllable as one character at its rendered width.
 
 - License: MIT.
 
 # What Changed from Isocline
 
 - Replaced `src/wcwidth.c` (Markus Kuhn, Unicode 5.0, 292 lines) with `src/gstr.h` (Unicode 17.0, grapheme-aware)
-- All isocline API and behavior is preserved — drop-in compatible
-- The `ic_` function prefix is unchanged
+- The editor iterates by extended grapheme cluster (UAX #29): cursor movement,
+  backspace/delete, transpose, wrapping, and truncation are cluster-atomic
+- Source-compatible with isocline: the `ic_` API is unchanged (recompile against
+  the renamed header; see the behavior differences below)
 - Single-file build is unchanged: `gcc -c src/icline.c`
+- Removed the Haskell bindings and VS2019 project files
+- Fixed inherited isocline bugs: the public `ic_init_custom_alloc` was
+  declared in the header but exported as `ic_init_custom_malloc` (unlinkable),
+  and exact-fit formatted output in `ic_printf`/prompt rendering was truncated
+  by one character
+
+### Behavior differences vs isocline
+
+- File and artifact names: `isocline.h`/`isocline.c` are now `icline.h`/`icline.c`,
+  and the library builds as `libicline.a` / `icline.lib`.
+- Cursor, backspace, delete, and transpose operate on whole grapheme clusters;
+  upstream stepped one codepoint at a time (several presses over one emoji).
+  `ic_prev_char`/`ic_next_char` step clusters too, and character-class callbacks
+  may now receive a multi-codepoint cluster.
+- Widths follow Unicode 17.0 instead of 5.0: many emoji went from 1 to 2
+  columns, and ZWJ/flag/VS16/keycap sequences measure 2 as rendered.
+- Conjoining Hangul jamo vowels/finals are zero-width (as wcwidth-heritage
+  terminals render them), so decomposed Hangul measures 2; upstream measured
+  lone jamo as 0 as well, but summed decomposed syllables per codepoint.
+- CR+LF is deliberately not treated as one cluster (UAX #29 GB3) so multi-line
+  buffers with Windows line endings lay out correctly.
+- The custom allocator entry point links under its documented name
+  `ic_init_custom_alloc`; upstream binaries export `ic_init_custom_malloc`.
 
 # Demo
 
@@ -36,7 +63,7 @@ Shows in order: unicode, syntax highlighting, brace matching, jump to matching b
 
 # Usage
 
-Include the isocline header in your C or C++ source:
+Include the icline header in your C or C++ source:
 ```C
 #include <include/icline.h>
 ```
@@ -46,7 +73,7 @@ and call `ic_readline` to get user input with rich editing abilities:
 char* input;
 while( (input = ic_readline("prompt")) != NULL ) { // ctrl+d/c or errors return NULL
   printf("you typed:\n%s\n", input); // use the input
-  free(input);
+  ic_free(input);
 }
 ```
 
@@ -60,14 +87,24 @@ $ gcc -o example -Iinclude test/example.c src/icline.c
 $ ./example
 ```
 
-# Run the Unicode Width Tests
+# Run the Tests
 
+With CMake (registers all tests with CTest):
+```
+$ cmake -S . -B build && cmake --build build
+$ ctest --test-dir build
+```
+
+Or build the width tests directly:
 ```
 $ gcc -o test_width test/test_width.c -std=c99
 $ ./test_width
 ```
 
-Tests cover ASCII, CJK, Hangul, combining marks, ZWJ emoji, flag sequences, keycap sequences, and VS16 presentation.
+`test_width` covers the gstr.h width engine (ASCII, CJK, Hangul, combining
+marks, ZWJ emoji, flags, keycaps, VS16); `test_editor_width` and
+`test_editor_ops` cover the editor's own iteration, editing operations, and
+wrapping on the same material; `test_stringbuf` covers formatted output.
 
 # Editing with icline
 
@@ -177,7 +214,7 @@ $ cd build/release
 $ cmake ../..
 $ cmake --build .
 ```
-This builds a static library `libicline.a` (or `isocline.lib` on Windows)
+This builds a static library `libicline.a` (or `icline.lib` on Windows)
 and the example program:
 ```
 $ ./example
@@ -185,7 +222,9 @@ $ ./example
 
 # API Reference
 
-See the [C API reference][docapi] and the [example] for example usage of history, completion, etc.
+See the [upstream isocline API reference][docapi] and the [example] for example
+usage of history, completion, etc. The `ic_` API is unchanged in icline; see
+the behavior differences above for where icline deliberately diverges.
 
 # Formatted Output
 
@@ -212,7 +251,11 @@ The original was created for use in the [Koka] interactive compiler.
 
 Changes from upstream:
 - Unicode 17.0 character width via [gstr.h](https://github.com/deths74r/gstr) (replacing Unicode 5.0 wcwidth.c)
-- Unicode width test suite
+- Grapheme-cluster iteration in the editor (cursor, deletion, wrapping)
+- Unicode width and editor test suites, registered with CTest
+- Fixed the unlinkable `ic_init_custom_alloc` and an exact-fit formatted-output
+  truncation (both inherited from upstream)
+- Removed the Haskell bindings and VS2019 project files
 
 # Releases
 
