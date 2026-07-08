@@ -106,10 +106,12 @@ int main(void) {
         sbuf_get_rc_at_pos(sb, 5, 0, 0, sbuf_len(sb), &rc);
         check("wide cluster wraps to next row", rc.row == 1);
         check("cluster occupies 2 columns on the wrapped row", rc.col == 2);
-        /* mid-cluster position (a bad completer could produce one): must not crash */
+        /* mid-cluster position (a bad completer could produce one): degrades
+         * gracefully — still resolves to the cluster's row */
         memset(&rc, 0, sizeof(rc));
         sbuf_get_rc_at_pos(sb, 5, 0, 0, 5, &rc);
-        check("mid-cluster position does not crash", 1);
+        check("mid-cluster position resolves to the cluster's row",
+              rc.row == 1 && rc.row_start == 2);
         sbuf_free(sb);
     }
 

@@ -54,7 +54,7 @@ struct stringbuf_s {
 // combining marks measure as the terminal renders them.
 static ssize_t char_column_width( const char* s, ssize_t n ) {
   if (s == NULL || n <= 0) return 0;
-  else if ((uint8_t)(*s) < ' ') return 0;   // controls; also CSI escape sequences
+  else if ((uint8_t)(*s) < ' ') return 0;   // C0 controls and CSI escape sequences (0x7F and C1 are zeroed by gstr)
   else {
     ssize_t w = (ssize_t)gstr_grapheme_width(s, (size_t)n, 0, (size_t)n);
     #ifdef _WIN32
