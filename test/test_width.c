@@ -67,9 +67,15 @@ int main(void) {
     check_cpwidth("grinning face", 0x1F600, 2);
     check_cpwidth("red heart", 0x2764, 1);  /* text presentation default */
 
-    /* Hangul Jamo medial — old isocline hardcoded as width 0, but Unicode
-     * East Asian Width is "N" (Neutral) = width 1. gstr follows the standard. */
-    check_cpwidth("Jamo medial", 0x1160, 1);
+    /* Conjoining Hangul jamo vowels/finals are zero-width: wcwidth-heritage
+     * terminals (xterm, kitty, foot) render them at 0 columns, so cursor math
+     * must agree — and decomposed Hangul (L+V+T) then sums to width 2. This
+     * deliberately overrides Unicode East Asian Width "N" (= 1). Leading jamo
+     * (L) stay wide: they render as a spacing glyph. */
+    check_cpwidth("Jamo medial", 0x1160, 0);
+    check_cpwidth("Jamo final", 0x11A8, 0);
+    check_cpwidth("Jamo extended-B final", 0xD7CB, 0);
+    check_cpwidth("Jamo leading", 0x1112, 2);
 
     printf("\n=== String width (gstrwidth) ===\n");
 
@@ -109,6 +115,16 @@ int main(void) {
 
     /* Keycap sequence: digit + VS16 + combining enclosing keycap */
     check_width("keycap 1️⃣", "1\xEF\xB8\x8F\xE2\x83\xA3", 2);
+
+    /* Decomposed Hangul: conjoining L+V(+T) is one grapheme, width 2 —
+     * same columns as the precomposed syllable. */
+    check_width("decomposed 한 (L+V+T)", "\xE1\x84\x92\xE1\x85\xA1\xE1\x86\xAB", 2);
+    check_width("decomposed 하 (L+V)", "\xE1\x84\x92\xE1\x85\xA1", 2);
+
+    /* Degenerate ZWJ clusters are not emoji sequences: the ZWJ rule needs an
+     * emoji (extended pictographic) base. */
+    check_width("lone ZWJ", "\xE2\x80\x8D", 0);
+    check_width("a + ZWJ", "a\xE2\x80\x8D", 1);
 
     printf("\n=== Results ===\n");
     if (failures == 0) {
