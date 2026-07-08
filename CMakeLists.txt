@@ -15,7 +15,7 @@ option(IC_SEPARATE_OBJS     "Compile with separate object files instead of one (
 
 set(ic_sources          src/icline.c)
 set(ic_example_sources  test/example.c test/test_colors.c)
-set(ic_test_sources     test/test_width.c test/test_stringbuf.c)
+set(ic_test_sources     test/test_width.c test/test_stringbuf.c test/test_editor_width.c test/test_editor_ops.c)
 
 # -----------------------------------------------------------------------------
 # Initial definitions
@@ -171,14 +171,16 @@ if(BUILD_TESTING)
   target_compile_options(test_width PRIVATE ${ic_cflags})
   add_test(NAME test_width COMMAND test_width)
 
-  # Stringbuf regression tests: compile src/icline.c into the test as a single
+  # Internal-function tests: compile src/icline.c into each test as a single
   # translation unit to reach internal (ic_private) functions. Must not link
   # libicline (duplicate symbols) and must not receive ${ic_cdefs}
   # (IC_SEPARATE_OBJS would disable the amalgamation include).
-  add_executable(test_stringbuf test/test_stringbuf.c)
-  target_compile_options(test_stringbuf PRIVATE ${ic_cflags})
-  target_include_directories(test_stringbuf PRIVATE include)
-  add_test(NAME test_stringbuf COMMAND test_stringbuf)
+  foreach(ic_tu_test test_stringbuf test_editor_width test_editor_ops)
+    add_executable(${ic_tu_test} test/${ic_tu_test}.c)
+    target_compile_options(${ic_tu_test} PRIVATE ${ic_cflags})
+    target_include_directories(${ic_tu_test} PRIVATE include)
+    add_test(NAME ${ic_tu_test} COMMAND ${ic_tu_test})
+  endforeach()
 
   # Smoke test: runs the linked library's output paths end to end.
   add_test(NAME test_colors COMMAND test_colors)

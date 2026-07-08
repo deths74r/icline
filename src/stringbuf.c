@@ -49,21 +49,14 @@ struct stringbuf_s {
 // String column width
 //-------------------------------------------------------------
 
-// column width of a utf8 single character sequence.
-// Uses gstr.h (Unicode 17.0) for width lookup.
-static ssize_t utf8_char_width( const char* s, ssize_t n ) {
-  if (n <= 0) return 0;
-  int w = utf8_charwidth(s, (size_t)n, 0);
-  return (ssize_t)(w >= 0 ? w : 1);
-}
-
-
-// The column width of a codepoint (0, 1, or 2)
+// The column width of a character unit: a grapheme cluster measured via
+// gstr.h (Unicode 17.0), so ZWJ sequences, flags, VS16 emoji, keycaps and
+// combining marks measure as the terminal renders them.
 static ssize_t char_column_width( const char* s, ssize_t n ) {
   if (s == NULL || n <= 0) return 0;
-  else if ((uint8_t)(*s) < ' ') return 0;   // also for CSI escape sequences
+  else if ((uint8_t)(*s) < ' ') return 0;   // controls; also CSI escape sequences
   else {
-    ssize_t w = utf8_char_width(s, n);
+    ssize_t w = (ssize_t)gstr_grapheme_width(s, (size_t)n, 0, (size_t)n);
     #ifdef _WIN32
     return (w <= 0 ? 1 : w); // windows console seems to use at least one column
     #else
@@ -123,15 +116,22 @@ ic_private ssize_t str_take_while_fit( const char* s, ssize_t max_width) {
 // String navigation 
 //-------------------------------------------------------------
 
-// get offset of the previous codepoint. does not skip back over CSI sequences.
+// get offset of the previous character unit (grapheme cluster or control byte).
+// does not skip back over CSI sequences.
 ic_private ssize_t str_prev_ofs( const char* s, ssize_t pos, ssize_t* width ) {
   ssize_t ofs = 0;
   if (s != NULL && pos > 0) {
-    ofs = 1;
-    while (pos > ofs) {
-      uint8_t u = (uint8_t)s[pos - ofs];
-      if (u < 0x80 || u > 0xBF) break;  // continue while follower
-      ofs++;
+    // ASCII fast path; needs a two-byte lookback since Prepend-class
+    // codepoints (all >= U+0080) cluster with a following base (UAX #29 GB9b)
+    if ((uint8_t)s[pos-1] < 0x80 && (pos == 1 || (uint8_t)s[pos-2] < 0x80)) {
+      ofs = 1;
+    }
+    else {
+      // treat the buffer as ending at pos: navigation always calls with
+      // pos on a unit boundary, so the cluster scan is exact
+      size_t prev = utf8_prev_grapheme(s, (size_t)pos, (size_t)pos);
+      ofs = pos - (ssize_t)prev;
+      if (ofs <= 0) ofs = 1;  // defensive: always make progress
     }
   }
   if (width != NULL) *width = char_column_width( s+(pos-ofs), ofs );
@@ -201,9 +201,33 @@ ic_private ssize_t str_next_cp_ofs( const char* s, ssize_t len, ssize_t pos, ssi
   return ofs;
 }
 
-// Offset to the next character unit, treats CSI escape sequences as a single code point.
+// Offset to the next character unit: a grapheme cluster, a CSI escape
+// sequence, or a single control byte. Escape sequences and controls are
+// zero-width. Controls are deliberately single-byte units — CR+LF does NOT
+// cluster (unlike UAX #29 GB3) so row layout can still find '\n'.
 ic_private ssize_t str_next_ofs( const char* s, ssize_t len, ssize_t pos, ssize_t* cwidth ) {
-  return str_next_cp_ofs(s, len, pos, cwidth);
+  ssize_t ofs = 0;
+  if (s != NULL && len > pos) {
+    if (skip_esc(s+pos,len-pos,&ofs)) {
+      // skip escape sequence
+    }
+    else if ((uint8_t)s[pos] < 0x20) {
+      ofs = 1;  // control characters are always their own unit
+    }
+    else if ((uint8_t)s[pos] < 0x80 && (pos+1 >= len || (uint8_t)s[pos+1] < 0x80)) {
+      // ASCII fast path: no two bytes < 0x80 ever form one cluster (CR+LF is
+      // handled above); ASCII followed by a >= 0x80 byte falls through so
+      // e + U+0301 still clusters
+      ofs = 1;
+    }
+    else {
+      size_t next = utf8_next_grapheme(s, (size_t)len, (size_t)pos);
+      ofs = (ssize_t)next - pos;
+      if (ofs <= 0) ofs = 1;  // defensive: always make progress
+    }
+  }
+  if (cwidth != NULL) *cwidth = char_column_width( s+pos, ofs );
+  return ofs;
 }
 
 static ssize_t str_limit_to_length( const char* s, ssize_t n ) {
