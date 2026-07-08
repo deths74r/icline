@@ -66,7 +66,8 @@ static void pos_adjust( ic_highlight_env_t* henv, ssize_t* ppos, ssize_t* plen )
       cpos = henv->cached_cpos;
     }
     while ( ucount < upos ) {
-      ssize_t next = str_next_ofs(henv->input, henv->input_len, cpos, NULL);
+      // codepoint iterator: negative positions are unicode character indices
+      ssize_t next = str_next_cp_ofs(henv->input, henv->input_len, cpos, NULL);
       if (next <= 0) return;
       ucount++;
       cpos += next;
@@ -82,7 +83,8 @@ static void pos_adjust( ic_highlight_env_t* henv, ssize_t* ppos, ssize_t* plen )
     ssize_t ucount = 0;
     ssize_t clen   = 0;    
     while (ucount < len) {
-      ssize_t next = str_next_ofs(henv->input, henv->input_len, pos + clen, NULL);
+      // codepoint iterator: negative lengths are unicode character counts
+      ssize_t next = str_next_cp_ofs(henv->input, henv->input_len, pos + clen, NULL);
       if (next <= 0) return;
       ucount++;
       clen += next;

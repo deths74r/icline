@@ -177,11 +177,15 @@ ic_private bool skip_esc( const char* s, ssize_t len, ssize_t* esclen ) {
 }
 
 // Offset to the next codepoint, treats CSI escape sequences as a single code point.
-ic_private ssize_t str_next_ofs( const char* s, ssize_t len, ssize_t pos, ssize_t* cwidth ) {
+// Deliberately codepoint-based (not grapheme-based); only for consumers whose
+// contract is per-codepoint: term.c's output-byte classification, highlight.c's
+// negative unicode character positions, and sbuf_strdup_from_utf8's
+// one-codepoint-at-a-time locale downconversion.
+ic_private ssize_t str_next_cp_ofs( const char* s, ssize_t len, ssize_t pos, ssize_t* cwidth ) {
   ssize_t ofs = 0;
   if (s != NULL && len > pos) {
     if (skip_esc(s+pos,len-pos,&ofs)) {
-      // skip escape sequence      
+      // skip escape sequence
     }
     else {
       ofs = 1;
@@ -190,11 +194,16 @@ ic_private ssize_t str_next_ofs( const char* s, ssize_t len, ssize_t pos, ssize_
         uint8_t u = (uint8_t)s[pos + ofs];
         if (u < 0x80 || u > 0xBF) break;  // break if not a follower
         ofs++;
-      }      
-    } 
+      }
+    }
   }
   if (cwidth != NULL) *cwidth = char_column_width( s+pos, ofs );
   return ofs;
+}
+
+// Offset to the next character unit, treats CSI escape sequences as a single code point.
+ic_private ssize_t str_next_ofs( const char* s, ssize_t len, ssize_t pos, ssize_t* cwidth ) {
+  return str_next_cp_ofs(s, len, pos, cwidth);
 }
 
 static ssize_t str_limit_to_length( const char* s, ssize_t n ) {
@@ -831,7 +840,8 @@ ic_private char* sbuf_strdup_from_utf8(stringbuf_t* sbuf) {
   if (s == NULL) return NULL;
   ssize_t dest = 0;
   for (ssize_t i = 0; i < len; ) {
-    ssize_t ofs = sbuf_next_ofs(sbuf, i, NULL);
+    // codepoint iterator: downconversion decodes exactly one codepoint per unit
+    ssize_t ofs = str_next_cp_ofs(sbuf->buf, len, i, NULL);
     if (ofs <= 0) {
       // invalid input
       break;

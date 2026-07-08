@@ -112,6 +112,12 @@ ic_private ssize_t sbuf_for_each_row( stringbuf_t* sbuf, ssize_t termw, ssize_t 
 ic_private ssize_t str_column_width( const char* s );
 ic_private ssize_t str_prev_ofs( const char* s, ssize_t pos, ssize_t* cwidth );
 ic_private ssize_t str_next_ofs( const char* s, ssize_t len, ssize_t pos, ssize_t* cwidth );
+
+// Codepoint-stepping variant of str_next_ofs (escape sequences still count as
+// one unit). Only for consumers whose contract is per-codepoint: term.c's
+// output classification, highlight.c's negative character positions, and
+// sbuf_strdup_from_utf8. Everything else uses str_next_ofs.
+ic_private ssize_t str_next_cp_ofs( const char* s, ssize_t len, ssize_t pos, ssize_t* cwidth );
 ic_private ssize_t str_skip_until_fit( const char* s, ssize_t max_width);  // tail that fits
 ic_private ssize_t str_take_while_fit( const char* s, ssize_t max_width);  // prefix that fits
 

@@ -13,7 +13,7 @@
 #include "common.h"
 #include "tty.h"
 #include "term.h"
-#include "stringbuf.h" // str_next_ofs
+#include "stringbuf.h" // str_next_cp_ofs
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -482,10 +482,11 @@ static void term_append_buf( term_t* term, const char* s, ssize_t len ) {
     // handle ascii sequences in bulk
     ssize_t ascii = 0;
     ssize_t next;
-    while ((next = str_next_ofs(s, len, pos+ascii, NULL)) > 0 && 
-            (uint8_t)s[pos + ascii] > '\x1B' && (uint8_t)s[pos + ascii] <= 0x7F ) 
+    // codepoint iterator: classifies output bytes; term_append_utf8 decodes one codepoint at a time
+    while ((next = str_next_cp_ofs(s, len, pos+ascii, NULL)) > 0 &&
+            (uint8_t)s[pos + ascii] > '\x1B' && (uint8_t)s[pos + ascii] <= 0x7F )
     {
-      ascii += next;      
+      ascii += next;
     }
     if (ascii > 0) {
       sbuf_append_n(term->buf, s+pos, ascii);
@@ -498,7 +499,7 @@ static void term_append_buf( term_t* term, const char* s, ssize_t len ) {
     if (c >= 0x80) {
       term_append_utf8(term, s+pos, next);
     }
-    // handle escape sequence (note: str_next_ofs considers whole CSI escape sequences at a time)
+    // handle escape sequence (note: str_next_cp_ofs considers whole CSI escape sequences at a time)
     else if (next > 1 && c == '\x1B') {
       term_append_esc(term, s+pos, next);
     }
@@ -824,7 +825,8 @@ static bool term_write_direct(term_t* term, const char* s, ssize_t len ) {
       // (We don't need to handle utf-8 separately as we set the codepage to always be in utf-8 mode)
       ssize_t nonctrl = 0;
       ssize_t next;
-      while( (next = str_next_ofs( s, len, pos+nonctrl, NULL )) > 0 && 
+      // codepoint iterator: classifies output bytes for console pass-through
+      while( (next = str_next_cp_ofs( s, len, pos+nonctrl, NULL )) > 0 &&
               (uint8_t)s[pos + nonctrl] >= ' ' && (uint8_t)s[pos + nonctrl] <= 0x7F) {
         nonctrl += next;
       }
@@ -839,7 +841,7 @@ static bool term_write_direct(term_t* term, const char* s, ssize_t len ) {
         term_write_console(term, s+pos, next);
       }
       else if (next > 1 && s[pos] == '\x1B') {                                
-        // handle control (note: str_next_ofs considers whole CSI escape sequences at a time)
+        // handle control (note: str_next_cp_ofs considers whole CSI escape sequences at a time)
         term_write_esc(term, s+pos, next);
       }
       else if (next == 1 && (s[pos] == '\r' || s[pos] == '\n' || s[pos] == '\t' || s[pos] == '\b')) {
