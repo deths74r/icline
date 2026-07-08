@@ -605,12 +605,14 @@ ic_private ssize_t sbuf_append_vprintf(stringbuf_t* sb, const char* fmt, va_list
   ssize_t avail = sb->buflen - sb->count;
   va_list args0;
   va_copy(args0, args);
-  ssize_t needed = vsnprintf(sb->buf + sb->count, to_size_t(avail), fmt, args0);
+  // pass avail+1 as the size: the allocation is always `buflen+1` bytes and `buf[buflen]` is reserved for a terminating zero
+  ssize_t needed = vsnprintf(sb->buf + sb->count, to_size_t(avail+1), fmt, args0);
+  va_end(args0);
   if (needed > avail) {
     sb->buf[sb->count] = 0;
     if (!sbuf_ensure_extra(sb, needed)) return sb->count;
     avail = sb->buflen - sb->count;
-    needed = vsnprintf(sb->buf + sb->count, to_size_t(avail), fmt, args);
+    needed = vsnprintf(sb->buf + sb->count, to_size_t(avail+1), fmt, args);
   }
   assert(needed <= avail);
   sb->count += (needed > avail ? avail : (needed >= 0 ? needed : 0));
