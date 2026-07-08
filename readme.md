@@ -59,13 +59,14 @@ The key change: **Unicode 17.0** character width via [gstr.h](https://github.com
 ![recording](doc/record-macos.svg)
 
 Shows in order: unicode, syntax highlighting, brace matching, jump to matching brace, auto indent, multiline editing, 24-bit colors, inline hinting, filename completion, and incremental history search.
-<sub>(screen capture was made with [termtosvg] by Nicolas Bedos)</sub>
+<sub>(recording from upstream isocline; screen capture was made with [termtosvg] by Nicolas Bedos)</sub>
 
 # Usage
 
-Include the icline header in your C or C++ source:
+Include the icline header in your C or C++ source (with the `include`
+directory on the include path, as in the build commands below):
 ```C
-#include <include/icline.h>
+#include "icline.h"
 ```
 
 and call `ic_readline` to get user input with rich editing abilities:
@@ -214,8 +215,8 @@ $ cd build/release
 $ cmake ../..
 $ cmake --build .
 ```
-This builds a static library `libicline.a` (or `icline.lib` on Windows)
-and the example program:
+This builds a static library `libicline.a` (or `icline.lib` on Windows),
+the test programs (see *Run the Tests* above), and the example program:
 ```
 $ ./example
 ```
@@ -259,6 +260,9 @@ Changes from upstream:
 
 # Releases
 
+* Unreleased (main): Grapheme-cluster editing (cursor, backspace/delete, transpose, wrapping are cluster-atomic);
+  fix the unlinkable `ic_init_custom_alloc` and an exact-fit formatted-output truncation; zero-width conjoining
+  Hangul jamo; CTest-registered test suites; remove Haskell bindings, VS2019 projects, and doxygen infrastructure.
 * `2026-04-09`: v1.1.0: Replace wcwidth.c (Unicode 5.0) with gstr.h (Unicode 17.0) for modern emoji, ZWJ, and CJK support.
 * `2022-01-15`: v1.0.9: (isocline) fix missing `ic_completion_arg`, fix null ptr check, fix /dev/null crash.
 * `2021-08-20`: v1.0.0: (isocline) initial release.
@@ -269,10 +273,6 @@ Changes from upstream:
 [submodule]: https://git-scm.com/book/en/v2/Git-Tools-Submodules
 [example]: https://github.com/deths74r/icline/blob/main/test/example.c
 [termtosvg]: https://github.com/nbedos/termtosvg
-[Rich]: https://github.com/willmcgugan/rich
 [RichBBcode]: https://rich.readthedocs.io/en/latest/markup.html
 [bbcode]: https://en.wikipedia.org/wiki/BBCode
-[htmlcolors]: https://en.wikipedia.org/wiki/Web_colors#HTML_color_names
-[ansicolors]: https://en.wikipedia.org/wiki/Web_colors#Basic_colors
-[ansicolor256]: https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
 [docapi]: https://daanx.github.io/isocline
