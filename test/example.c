@@ -20,7 +20,7 @@ static void completer(ic_completion_env_t* cenv, const char* prefix );
 static void highlighter(ic_highlight_env_t* henv, const char* input, void* arg);
 
 // main example
-int main() 
+int main(void)
 {
   setlocale(LC_ALL,"C.UTF-8");  // we use utf-8 in this example
 

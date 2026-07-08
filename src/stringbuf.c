@@ -8,7 +8,23 @@
 // Unicode character width via gstr.h (Unicode 17.0)
 // Replaces the bundled wcwidth.c (Unicode 5.0) with modern tables
 // and grapheme-cluster-aware width support.
+//
+// gstr.h is vendored from <https://github.com/deths74r/gstr>. Its grapheme
+// offsets are deliberately `int` (negative values are sentinels), which trips
+// -Wsign-conversion where they meet size_t lengths. Suppress for the vendored
+// header only; fix the types upstream and drop this on the next re-vendor.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+#pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#endif
 #include "gstr.h"
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <stdio.h>
 #include <string.h>

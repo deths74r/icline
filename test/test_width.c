@@ -1,7 +1,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+/* gstr.h is vendored; see the note in src/stringbuf.c about its int offsets
+ * and -Wsign-conversion. */
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+#pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#endif
 #include "../src/gstr.h"
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 /*
  * Test that gstr.h width functions return correct values for
