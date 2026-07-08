@@ -109,9 +109,6 @@ ic_private ssize_t sbuf_for_each_row( stringbuf_t* sbuf, ssize_t termw, ssize_t 
 // Strings
 //-------------------------------------------------------------
 
-// skip a single CSI sequence (ESC [ ...)
-ic_private bool    skip_csi_esc( const char* s, ssize_t len, ssize_t* esclen ); // used in term.c
-
 ic_private ssize_t str_column_width( const char* s );
 ic_private ssize_t str_prev_ofs( const char* s, ssize_t pos, ssize_t* cwidth );
 ic_private ssize_t str_next_ofs( const char* s, ssize_t len, ssize_t pos, ssize_t* cwidth );

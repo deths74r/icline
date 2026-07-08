@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "stringbuf.h" // str_next_ofs
+#include "stringbuf.h" // sbuf_len, sbuf_append_n
 #include "attr.h"
 #include "term.h"      // color_from_ansi256
 
